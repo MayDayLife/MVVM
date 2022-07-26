@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <div id="userList">
+            <div style="float: left;">id: <input type="text" id="id"></div>
+            <div style="float: left;margin-left: 10px;">name: <input type="text" id="name"></div>
+            <div style="float: left;margin-left: 10px;">age: <input type="text" id="age"></div>
+            <button id="add" style="margin-left: 10px;">添加</button>
+            <table style="margin-top: 10px;border-top: 1px solid;border-bottom: 1px solid;">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>姓名</th>
+                        <th>年龄</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <script>
+            function UserManager(data, table) {
+                this.data = data;
+                this.table = table;
+                this.render = function () {
+                    let tbody = this.table.getElementsByTagName("tbody")[0];
+                    if (tbody) {
+                        tbody.remove();
+                    }
+                    tbody = document.createElement("tbody");
+                    this.data.forEach((user) => {
+                        let trElement = document.createElement("tr");
+                        for (u in user) {
+                            let input = document.createElement("input");
+                            let tdElement = document.createElement("td");
+                            input.value = user[u];
+                            input.name = u;
+                            input.setAttribute("disabled", "disabled");
+                            tdElement.appendChild(input);
+                            trElement.appendChild(tdElement);
+                            trElement.addEventListener('dblclick', (e) => {
+                                input.removeAttribute("disabled");
+                            });
+                        }
+                        let tdButtonElement = document.createElement("td");
+                        //delete
+                        let deleteButton = document.createElement("button");
+                        deleteButton.textContent = "删除";
+                        deleteButton.addEventListener('click', (e) => {
+                            this.deleteUser(user);
+                        });
+                        tdButtonElement.appendChild(deleteButton);
+                        //update
+                        let updateButton = document.createElement("button");
+                        updateButton.textContent = "修改";
+                        updateButton.addEventListener('click', (e) => {
+                            let inputEles = e.target.parentElement.parentElement.getElementsByTagName("input");
+                            let data = {};
+                            for (let i = 0; i < inputEles.length; i++) {
+                                data[inputEles[i].name] = inputEles[i].value;
+                            }
+                            this.updateUser(user, data);
+                        });
+                        tdButtonElement.appendChild(updateButton);
+
+                        trElement.appendChild(tdButtonElement);
+                        tbody.appendChild(trElement);
+                    });
+                    document.querySelector("#userList table").appendChild(tbody);
+                };
+                this.deleteUser = function (u) {
+                    let index = this.data.indexOf(u);
+                    this.data.splice(index, 1);
+                    this.render();
+                };
+                this.addUser = function (u) {
+                    this.data.splice(this.data.length, 0, u);
+                    this.render();
+                };
+                this.updateUser = function (u, data) {
+                    let index = this.data.indexOf(u);
+                    this.data.splice(index, 1, data);
+                    this.render();
+                }
+            }
+            window.onload = function () {
+                let data = [{ id: 1, name: '张三', age: 10 }, { id: 2, name: '李四', age: 20 }, { id: 3, name: '王五', age: 30 }];
+                let userManager = new UserManager(data, document.querySelector("#userList table"));
+                userManager.render();
+                let addButton = document.querySelector("#add");
+                addButton.addEventListener('click', (e) => {
+                    let u = { id: document.querySelector("#id").value, name: document.querySelector("#name").value, age: document.querySelector("#age").value };
+                    userManager.addUser(u);
+                })
+            }
+        </script>
+    </body>
+</html>
